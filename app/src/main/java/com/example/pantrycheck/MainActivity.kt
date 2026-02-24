@@ -20,6 +20,7 @@ import java.util.Calendar
 
 class MainActivity : AppCompatActivity() {
 
+    // Variables globables
     private lateinit var adapter: ProductoAdapter
     private var listaProductos = mutableListOf<Producto>()
     private lateinit var database: AppDatabase
@@ -28,22 +29,22 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Inicializa la Base de Datos
+        // 1. Inicializa la Base de Datos
         database = AppDatabase.getDatabase(this)
 
-        // Configuracion de la lista UI
+        // 2. Configuracion de la lista UI
         val rvInventario: RecyclerView = findViewById(R.id.rvInventario)
         rvInventario.layoutManager = LinearLayoutManager(this)
         adapter = ProductoAdapter(listaProductos)
         rvInventario.adapter = adapter
 
-        // Activar función de deslizar para borrar
+        // 3. Activa función de swipe to delete
         configurarDeslizarParaBorrar(rvInventario)
 
-        // Cargar los datos desde SQLite al abrir la app
+        // 4. Cargar los datos desde SQLite al abrir la app
         cargarDatosDesdeSQLite()
 
-        // Botón flotante para agregar
+        // 5. Botón agregar
         val fabAgregar: View = findViewById(R.id.fabAgregar)
         fabAgregar.setOnClickListener {
             mostrarDialogoPaso1()
@@ -61,6 +62,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // Logica swipe to delete
     private fun configurarDeslizarParaBorrar(recyclerView: RecyclerView) {
         val swipeCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
             override fun onMove(r: RecyclerView, v: RecyclerView.ViewHolder, t: RecyclerView.ViewHolder) = false
@@ -69,6 +71,7 @@ class MainActivity : AppCompatActivity() {
                 val posicion = viewHolder.adapterPosition
                 val productoSeleccionado = listaProductos[posicion]
 
+                // Se elimina de la base datos y despues de la lista visual
                 lifecycleScope.launch(Dispatchers.IO) {
                     database.productoDao().eliminar(productoSeleccionado)
                     withContext(Dispatchers.Main) {
@@ -79,6 +82,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        // Se agrega al recyclerView
         ItemTouchHelper(swipeCallback).attachToRecyclerView(recyclerView)
     }
 
@@ -107,9 +111,10 @@ class MainActivity : AppCompatActivity() {
                 val nombre = inputNombre.text.toString()
                 val cantidadStr = inputCantidad.text.toString()
 
+                // Validacion para no dejar campos en blanco
                 if (nombre.isNotBlank() && cantidadStr.isNotBlank()) {
                     val cantidadFina = cantidadStr.toInt()
-                    mostrarCalendarioPaso2(nombre, cantidadFina)
+                    mostrarCalendarioPaso2(nombre, cantidadFina) // Calendario
                 } else {
                     Toast.makeText(this, "Llena todos los campos", Toast.LENGTH_SHORT).show()
                 }
@@ -118,12 +123,15 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    // Mostrar calendario
     private fun mostrarCalendarioPaso2(nombreProducto: String, cantidadProducto: Int) {
-        val calendario = Calendar.getInstance()
+        val calendario = Calendar.getInstance() // Fecha actual
 
         val datePickerDialog = DatePickerDialog(this, { _, year, month, dayOfMonth ->
+            // Formatear la fecha
             val fechaFormateada = "$dayOfMonth/${month + 1}/$year"
 
+            // Crear un nuevo producto
             val nuevoProducto = Producto(
                 nombre = nombreProducto,
                 cantidad = cantidadProducto, // Ya guarda la cantidad real
@@ -140,7 +148,7 @@ class MainActivity : AppCompatActivity() {
 
         }, calendario.get(Calendar.YEAR), calendario.get(Calendar.MONTH), calendario.get(Calendar.DAY_OF_MONTH))
 
-        // Titulo de calendario
+        // Titulo para ventana del calendario
         datePickerDialog.setTitle("Inserte fecha de caducidad")
         datePickerDialog.show()
     }
