@@ -6,8 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ProductoAdapter(private val lista: List<Producto>) :
-    RecyclerView.Adapter<ProductoAdapter.ViewHolder>() {
+class ProductoAdapter(private val lista: List<Producto>) : RecyclerView.Adapter<ProductoAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val nombre: TextView = view.findViewById(R.id.tvNombreProducto)
@@ -17,17 +16,18 @@ class ProductoAdapter(private val lista: List<Producto>) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_producto, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_producto, parent, false)
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val producto = lista[position]
-        holder.nombre.text = producto.Nombre
-        holder.fecha.text = "Vence: ${producto.FechaCaducidad}"
-        holder.cantidad.text = "Cant: ${producto.Cantidad}"
-        holder.precio.text = "$${producto.PrecioEstimado}"
+        holder.nombre.text = producto.nombre
+        holder.fecha.text = "Vence: ${producto.fechaCaducidad}"
+        holder.cantidad.text = "Cant: ${producto.cantidad}"
+
+        // Decimales
+        holder.precio.text = String.format("$%.2f", producto.precioEstimado)
     }
 
     override fun getItemCount() = lista.size

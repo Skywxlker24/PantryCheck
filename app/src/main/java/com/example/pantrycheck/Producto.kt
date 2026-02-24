@@ -5,10 +5,10 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "tabla_productos")
 data class Producto(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val Nombre: String,
-    val Cantidad: Int,
-    val PrecioEstimado: Double,
-    val FechaCaducidad: String
+    @PrimaryKey(autoGenerate = true) val id: Int = 0, // Room llenará este ID automáticamente
+    val nombre: String,
+    val cantidad: Int,
+    val precioEstimado: Double,
+    val fechaCaducidad: String
 )
 
