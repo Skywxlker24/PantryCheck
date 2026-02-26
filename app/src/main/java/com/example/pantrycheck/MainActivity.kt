@@ -6,6 +6,7 @@ import android.text.InputType
 import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +21,6 @@ import java.util.Calendar
 
 class MainActivity : AppCompatActivity() {
 
-    // Variables globables
     private lateinit var adapter: ProductoAdapter
     private var listaProductos = mutableListOf<Producto>()
     private lateinit var database: AppDatabase
@@ -29,40 +29,46 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // 1. Inicializa la Base de Datos
+        // 1. Conexion a base de datos
         database = AppDatabase.getDatabase(this)
 
-        // 2. Configuracion de la lista UI
+        // 2. Crear lista de productos
         val rvInventario: RecyclerView = findViewById(R.id.rvInventario)
         rvInventario.layoutManager = LinearLayoutManager(this)
-        adapter = ProductoAdapter(listaProductos)
+
+        // 3. Crear adaptador
+        adapter = ProductoAdapter(listaProductos) { productoTocado ->
+            mostrarDialogoEdicionPaso1(productoTocado)
+        }
         rvInventario.adapter = adapter
 
-        // 3. Activa función de swipe to delete
+        // 4. Cargar datos desde SQLite
         configurarDeslizarParaBorrar(rvInventario)
-
-        // 4. Cargar los datos desde SQLite al abrir la app
         cargarDatosDesdeSQLite()
 
-        // 5. Botón agregar
+        // 5. Boton agregar
         val fabAgregar: View = findViewById(R.id.fabAgregar)
         fabAgregar.setOnClickListener {
-            mostrarDialogoPaso1()
+            mostrarDialogoAgregarPaso1()
         }
     }
 
     private fun cargarDatosDesdeSQLite() {
         lifecycleScope.launch(Dispatchers.IO) {
-            val datosGuardados = database.productoDao().obtenerTodos()
-            withContext(Dispatchers.Main) {
-                listaProductos.clear()
-                listaProductos.addAll(datosGuardados)
-                adapter.notifyDataSetChanged()
+            try {
+                val datosGuardados = database.productoDao().obtenerTodos()
+                withContext(Dispatchers.Main) {
+                    listaProductos.clear()
+                    listaProductos.addAll(datosGuardados)
+                    adapter.notifyDataSetChanged()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
 
-    // Logica swipe to delete
+    // 6. Swipe to delete
     private fun configurarDeslizarParaBorrar(recyclerView: RecyclerView) {
         val swipeCallback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
             override fun onMove(r: RecyclerView, v: RecyclerView.ViewHolder, t: RecyclerView.ViewHolder) = false
@@ -71,85 +77,175 @@ class MainActivity : AppCompatActivity() {
                 val posicion = viewHolder.adapterPosition
                 val productoSeleccionado = listaProductos[posicion]
 
-                // Se elimina de la base datos y despues de la lista visual
-                lifecycleScope.launch(Dispatchers.IO) {
-                    database.productoDao().eliminar(productoSeleccionado)
-                    withContext(Dispatchers.Main) {
-                        listaProductos.removeAt(posicion)
-                        adapter.notifyItemRemoved(posicion)
-                        Toast.makeText(this@MainActivity, "Producto eliminado", Toast.LENGTH_SHORT).show()
+                // Mostrar diálogo de confirmación
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Eliminar Producto")
+                    .setMessage("¿Estás seguro de que deseas tirar '${productoSeleccionado.nombre}' de tu despensa?")
+                    .setCancelable(false)
+                    .setPositiveButton("Confirmar") { _, _ ->
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            database.productoDao().eliminar(productoSeleccionado)
+                            withContext(Dispatchers.Main) {
+                                listaProductos.removeAt(posicion)
+                                adapter.notifyItemRemoved(posicion)
+                                Toast.makeText(this@MainActivity, "Eliminado", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
-                }
+                    .setNegativeButton("Cancelar") { dialog, _ ->
+                        adapter.notifyItemChanged(posicion)
+                        dialog.dismiss()
+                    }
+                    .show()
             }
         }
-        // Se agrega al recyclerView
         ItemTouchHelper(swipeCallback).attachToRecyclerView(recyclerView)
     }
 
-    private fun mostrarDialogoPaso1() {
-        // nuevo layout para agrupar los dos campos
+    // 7. Agregar
+    private fun mostrarDialogoAgregarPaso1() {
+        val scrollView = ScrollView(this)
         val layout = LinearLayout(this)
         layout.orientation = LinearLayout.VERTICAL
         layout.setPadding(50, 40, 50, 40)
 
-        val inputNombre = EditText(this)
-        inputNombre.hint = "Nombre (Ej. Leche)"
-
-        val inputCantidad = EditText(this)
-        inputCantidad.hint = "Cantidad (Ej. 2)"
-        // Teclado numerico para cantidad
-        inputCantidad.inputType = InputType.TYPE_CLASS_NUMBER
+        val inputNombre = EditText(this).apply { hint = "Nombre (Ej. Leche)" }
+        val inputEsp = EditText(this).apply { hint = "Especificaciones (Ej. Deslactosada)" }
+        val inputCat = EditText(this).apply { hint = "Categoría (Ej. Lácteos)" }
+        val inputCantidad = EditText(this).apply {
+            hint = "Cantidad (Ej. 2)"
+            inputType = InputType.TYPE_CLASS_NUMBER
+        }
+        val inputPrecio = EditText(this).apply {
+            hint = "Precio Unitario (Ej. 28.50)"
+            inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+        }
 
         layout.addView(inputNombre)
+        layout.addView(inputEsp)
+        layout.addView(inputCat)
         layout.addView(inputCantidad)
+        layout.addView(inputPrecio)
+        scrollView.addView(layout)
 
         AlertDialog.Builder(this)
             .setTitle("Nuevo Producto")
-            .setMessage("Ingresa los datos del producto:")
-            .setView(layout)
+            .setView(scrollView)
             .setPositiveButton("Siguiente") { _, _ ->
                 val nombre = inputNombre.text.toString()
-                val cantidadStr = inputCantidad.text.toString()
+                val esp = inputEsp.text.toString()
+                val cat = inputCat.text.toString()
+                val cantStr = inputCantidad.text.toString()
+                val precioStr = inputPrecio.text.toString()
 
-                // Validacion para no dejar campos en blanco
-                if (nombre.isNotBlank() && cantidadStr.isNotBlank()) {
-                    val cantidadFina = cantidadStr.toInt()
-                    mostrarCalendarioPaso2(nombre, cantidadFina) // Calendario
+                if (nombre.isNotBlank() && cantStr.isNotBlank() && precioStr.isNotBlank()) {
+                    val cantidadFina = cantStr.toIntOrNull() ?: 1
+                    val precioFino = precioStr.replace(",", ".").toDoubleOrNull() ?: 0.0
+                    mostrarCalendarioPaso2(null, nombre, esp, cat, cantidadFina, precioFino)
                 } else {
-                    Toast.makeText(this, "Llena todos los campos", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Faltan datos obligatorios", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancelar", null)
             .show()
     }
 
-    // Mostrar calendario
-    private fun mostrarCalendarioPaso2(nombreProducto: String, cantidadProducto: Int) {
-        val calendario = Calendar.getInstance() // Fecha actual
+    // 8. Editar
+    private fun mostrarDialogoEdicionPaso1(producto: Producto) {
+        val scrollView = ScrollView(this)
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.VERTICAL
+        layout.setPadding(50, 40, 50, 40)
+
+        val inputNombre = EditText(this).apply { setText(producto.nombre) }
+        val inputEsp = EditText(this).apply { setText(if(producto.especificaciones=="N/A") "" else producto.especificaciones) }
+        val inputCat = EditText(this).apply { setText(if(producto.categoria=="Sin Categoría") "" else producto.categoria) }
+        val inputCantidad = EditText(this).apply {
+            setText(producto.cantidad.toString())
+            inputType = InputType.TYPE_CLASS_NUMBER
+        }
+        val inputPrecio = EditText(this).apply {
+            setText(producto.precioPorUnidad.toString())
+            inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+        }
+
+        layout.addView(inputNombre)
+        layout.addView(inputEsp)
+        layout.addView(inputCat)
+        layout.addView(inputCantidad)
+        layout.addView(inputPrecio)
+        scrollView.addView(layout)
+
+        AlertDialog.Builder(this)
+            .setTitle("Editar Producto")
+            .setView(scrollView)
+            .setPositiveButton("Siguiente") { _, _ ->
+                val nombre = inputNombre.text.toString()
+                val esp = inputEsp.text.toString()
+                val cat = inputCat.text.toString()
+                val cantStr = inputCantidad.text.toString()
+                val precioStr = inputPrecio.text.toString()
+
+                if (nombre.isNotBlank() && cantStr.isNotBlank() && precioStr.isNotBlank()) {
+                    val cantidadFina = cantStr.toIntOrNull() ?: 1
+                    val precioFino = precioStr.replace(",", ".").toDoubleOrNull() ?: 0.0
+                    mostrarCalendarioPaso2(producto, nombre, esp, cat, cantidadFina, precioFino)
+                } else {
+                    Toast.makeText(this, "Faltan datos obligatorios", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    // 9. Calendario
+    private fun mostrarCalendarioPaso2(productoViejo: Producto?, nombre: String, esp: String, cat: String, cantidad: Int, precio: Double) {
+        val calendario = Calendar.getInstance()
+
+        var anio = calendario.get(Calendar.YEAR)
+        var mes = calendario.get(Calendar.MONTH)
+        var dia = calendario.get(Calendar.DAY_OF_MONTH)
+
+        if (productoViejo != null) {
+            val partes = productoViejo.fechaCaducidad.split("/")
+            if (partes.size == 3) {
+                dia = partes[0].toIntOrNull() ?: dia
+                mes = (partes[1].toIntOrNull() ?: (mes + 1)) - 1
+                anio = partes[2].toIntOrNull() ?: anio
+            }
+        }
 
         val datePickerDialog = DatePickerDialog(this, { _, year, month, dayOfMonth ->
-            // Formatear la fecha
-            val fechaFormateada = "$dayOfMonth/${month + 1}/$year"
+            try {
+                val fechaFormateada = "$dayOfMonth/${month + 1}/$year"
+                val idAsignar = productoViejo?.id ?: 0
 
-            // Crear un nuevo producto
-            val nuevoProducto = Producto(
-                nombre = nombreProducto,
-                cantidad = cantidadProducto, // Ya guarda la cantidad real
-                precioEstimado = 25.50, // Precio fijo por ahora
-                fechaCaducidad = fechaFormateada
-            )
+                val productoFinal = Producto(
+                    id = idAsignar,
+                    nombre = nombre,
+                    especificaciones = esp.ifBlank { "N/A" },
+                    categoria = cat.ifBlank { "Sin Categoría" },
+                    cantidad = cantidad,
+                    precioPorUnidad = precio,
+                    fechaCaducidad = fechaFormateada
+                )
 
-            // Guardar en la base de datos
-            lifecycleScope.launch(Dispatchers.IO) {
-                database.productoDao().insertar(nuevoProducto)
-                cargarDatosDesdeSQLite()
+                lifecycleScope.launch(Dispatchers.IO) {
+                    if (productoViejo == null) {
+                        database.productoDao().insertar(productoFinal)
+                    } else {
+                        database.productoDao().actualizar(productoFinal)
+                    }
+                    cargarDatosDesdeSQLite()
+                }
+                Toast.makeText(this, if (productoViejo == null) "Guardado" else "Actualizado", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(this, "Error al guardar", Toast.LENGTH_SHORT).show()
             }
-            Toast.makeText(this, "Guardado en la despensa", Toast.LENGTH_SHORT).show()
+        }, anio, mes, dia)
 
-        }, calendario.get(Calendar.YEAR), calendario.get(Calendar.MONTH), calendario.get(Calendar.DAY_OF_MONTH))
-
-        // Titulo para ventana del calendario
-        datePickerDialog.setTitle("Inserte fecha de caducidad")
+        datePickerDialog.setTitle(if (productoViejo == null) "Inserte fecha de caducidad" else "Modificar fecha")
         datePickerDialog.show()
     }
 }
