@@ -1,9 +1,16 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.PantryCheck" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-    </style>
+    <style name="Theme.PantryCheck" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 
-    <style name="Theme.PantryCheck" parent="Base.Theme.PantryCheck" />
+        <item name="colorPrimary">@color/verde_lima</item>
+        <item name="colorPrimaryVariant">@color/azul_marino</item>
+        <item name="colorOnPrimary">@color/blanco_puro</item>
+
+        <item name="android:windowBackground">@color/fondo_pantalla</item>
+
+        <item name="android:statusBarColor">@color/fondo_pantalla</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+        <item name="android:navigationBarColor">@color/fondo_barra_inferior</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
 </resources>

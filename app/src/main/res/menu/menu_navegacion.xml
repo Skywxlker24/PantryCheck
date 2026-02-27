@@ -1,15 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
     <item
         android:id="@+id/nav_inventario"
-        android:icon="@android:drawable/ic_menu_agenda"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
         android:title="Despensa" />
+
     <item
         android:id="@+id/nav_compras"
-        android:icon="@android:drawable/ic_menu_myplaces"
+        android:icon="@android:drawable/ic_menu_agenda"
         android:title="Compras" />
+
+    <item
+        android:id="@+id/nav_fantasma"
+        android:title=""
+        android:enabled="false" />
+
+    <item
+        android:id="@+id/nav_alertas"
+        android:icon="@android:drawable/ic_popup_reminder"
+        android:title="Alertas" />
+
     <item
         android:id="@+id/nav_ajustes"
-        android:icon="@android:drawable/ic_menu_preferences"
+        android:icon="@android:drawable/ic_menu_manage"
         android:title="Ajustes" />
+
 </menu>

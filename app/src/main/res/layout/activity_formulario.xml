@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:background="@color/fondo_pantalla">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/btnVolverF"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:text="⬅ Volver"
+                android:textColor="@color/icono_inactivo"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+            <TextView
+                android:id="@+id/tvTituloFormulario"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Registrar Producto"
+                android:textColor="@color/azul_marino"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nombre del Producto" android:textColor="@color/azul_marino" android:textStyle="bold"/>
+        <EditText
+            android:id="@+id/etNombreF"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Ej. Leche Entera"
+            android:background="@color/fondo_barra_inferior"
+            android:paddingHorizontal="12dp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Categoría" android:textColor="@color/azul_marino" android:textStyle="bold"/>
+        <EditText
+            android:id="@+id/etCategoriaF"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Ej. Lácteos"
+            android:background="@color/fondo_barra_inferior"
+            android:paddingHorizontal="12dp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Especificaciones" android:textColor="@color/azul_marino" android:textStyle="bold"/>
+        <EditText
+            android:id="@+id/etEspecificacionesF"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Ej. Deslactosada 1L"
+            android:background="@color/fondo_barra_inferior"
+            android:paddingHorizontal="12dp"
+            android:layout_marginBottom="16dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="8dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cantidad" android:textColor="@color/azul_marino" android:textStyle="bold"/>
+                <EditText
+                    android:id="@+id/etCantidadF"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:inputType="number"
+                    android:hint="Ej. 2"
+                    android:background="@color/fondo_barra_inferior"
+                    android:paddingHorizontal="12dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="8dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Precio Unitario" android:textColor="@color/azul_marino" android:textStyle="bold"/>
+                <EditText
+                    android:id="@+id/etPrecioF"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:inputType="numberDecimal"
+                    android:hint="Ej. 28.50"
+                    android:background="@color/fondo_barra_inferior"
+                    android:paddingHorizontal="12dp"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Fecha de Caducidad" android:textColor="@color/azul_marino" android:textStyle="bold"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSeleccionarFechaF"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Tocar para elegir fecha"
+            android:textColor="@color/blanco_puro"
+            app:backgroundTint="@color/azul_marino"
+            app:cornerRadius="30dp"
+            android:layout_marginBottom="24dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGuardarF"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Guardar Producto"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/blanco_puro"
+            app:backgroundTint="@color/verde_lima"
+            app:cornerRadius="30dp" />
+
+    </LinearLayout>
+</ScrollView>
