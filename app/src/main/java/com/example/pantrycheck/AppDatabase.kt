@@ -5,9 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Producto::class], version = 2, exportSchema = false)
+// ¡NUEVO! Agregamos ItemCompra::class y subimos a versión 3
+@Database(entities = [Producto::class, ItemCompra::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
+
     abstract fun productoDao(): ProductoDao
+    abstract fun compraDao(): CompraDao
 
     companion object {
         @Volatile
