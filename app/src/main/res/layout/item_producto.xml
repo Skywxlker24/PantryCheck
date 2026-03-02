@@ -12,8 +12,16 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:layout_height="wrap_content">
+
+        <View
+            android:id="@+id/vSemaforo"
+            android:layout_width="12dp"
+            android:layout_height="0dp"
+            android:background="@color/verde_lima"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
             android:id="@+id/tvNombreProducto"
@@ -24,8 +32,10 @@
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/vSemaforo"
             app:layout_constraintEnd_toStartOf="@+id/cardCantidad"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"/>
 
         <TextView
@@ -36,8 +46,9 @@
             android:textColor="@color/icono_inactivo"
             android:textSize="14sp"
             app:layout_constraintTop_toBottomOf="@id/tvNombreProducto"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/vSemaforo"
             app:layout_constraintEnd_toStartOf="@+id/cardCantidad"
+            android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:layout_marginTop="4dp"/>
 
@@ -48,7 +59,8 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             app:layout_constraintTop_toBottomOf="@id/tvCategoriaProducto"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/vSemaforo"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="16dp">
 
             <TextView
@@ -64,10 +76,26 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="15/10/2026"
-                android:textColor="#E53935"
+                android:textColor="@color/icono_inactivo"
                 android:textSize="14sp"
                 android:textStyle="bold"/>
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvEstadoCaducidad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="¡Producto Caducado!"
+            android:textColor="#757575"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/llCaducidad"
+            app:layout_constraintStart_toEndOf="@id/vSemaforo"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cardCantidad"
@@ -77,7 +105,9 @@
             app:cardBackgroundColor="@color/verde_lima"
             app:cardElevation="0dp"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp">
 
             <TextView
                 android:id="@+id/tvCantidadProducto"
@@ -92,17 +122,31 @@
         </androidx.cardview.widget.CardView>
 
         <TextView
-            android:id="@+id/tvPrecioProducto"
+            android:id="@+id/tvPrecioUnidad"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="$28.50"
+            android:text="Precio ud: $15.00"
+            android:textColor="@color/icono_inactivo"
+            android:textSize="13sp"
+            app:layout_constraintTop_toBottomOf="@id/cardCantidad"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="12dp"/>
+
+        <TextView
+            android:id="@+id/tvPrecioTotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total: $30.00"
             android:textColor="@color/verde_lima"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/tvPrecioUnidad"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cardCantidad"
-            android:layout_marginTop="12dp"/>
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="16dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

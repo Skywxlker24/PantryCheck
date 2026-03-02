@@ -19,13 +19,13 @@ class MainActivity : AppCompatActivity() {
         val bottomNav: BottomNavigationView = findViewById(R.id.bottomNavigation)
         val fabPrincipal: FloatingActionButton = findViewById(R.id.fabPrincipal)
 
-        // Hacemos transparente el fondo para ver la curva del BottomAppBar
+        // Desactivamos el efecto de sombreado
         bottomNav.background = null
 
         // Desactivamos el ícono "Fantasma" del centro (índice 2) para que no se pueda clickear
         bottomNav.menu.getItem(2).isEnabled = false
 
-        // Iniciar con la pantalla de Inventario
+        // Iniciar con la pantalla Inventario
         if (savedInstanceState == null) {
             cambiarFragmento(InventarioFragment())
         }

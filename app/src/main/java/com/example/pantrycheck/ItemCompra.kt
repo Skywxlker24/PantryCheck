@@ -9,7 +9,7 @@ data class ItemCompra(
     val nombre: String,
     val cantidad: Int,
     val precioEstimado: Double,
-    var comprado: Boolean = false // Esto es para el Checkbox (marcar lo que ya echaste al carrito)
+    var comprado: Boolean = false // Estado de compra
 ) {
     val subtotal: Double
         get() = cantidad * precioEstimado

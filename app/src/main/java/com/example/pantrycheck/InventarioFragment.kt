@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -50,21 +51,17 @@ class InventarioFragment : Fragment() {
         rvInventario.adapter = adapter
         configurarDeslizarParaBorrar(rvInventario)
 
-        // --- ANIMACIÓN DEL BANNER DE BIENVENIDA ---
+        // Animación de Bienvenida
         val bannerBienvenida = view.findViewById<View>(R.id.bannerBienvenida)
-
         viewLifecycleOwner.lifecycleScope.launch {
-            delay(3000) // Temporizador de 3 segundos
+            delay(3000)
             withContext(Dispatchers.Main) {
-                // Si el usuario cambia de pestaña rápido, evitamos que crashee
                 if (bannerBienvenida != null) {
                     bannerBienvenida.animate()
-                        .alpha(0f) // Hace que se vuelva invisible suavemente
-                        .translationY(-bannerBienvenida.height.toFloat()) // Lo desliza hacia arriba
-                        .setDuration(500) // La animación dura medio segundo
-                        .withEndAction {
-                            bannerBienvenida.visibility = View.GONE // Lo borra de la pantalla
-                        }
+                        .alpha(0f)
+                        .translationY(-bannerBienvenida.height.toFloat())
+                        .setDuration(500)
+                        .withEndAction { bannerBienvenida.visibility = View.GONE }
                         .start()
                 }
             }
@@ -85,9 +82,7 @@ class InventarioFragment : Fragment() {
                     listaProductos.addAll(datosGuardados)
                     adapter.notifyDataSetChanged()
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+            } catch (e: Exception) { e.printStackTrace() }
         }
     }
 
@@ -103,13 +98,12 @@ class InventarioFragment : Fragment() {
                     .setTitle("Eliminar Producto")
                     .setMessage("¿Estás seguro de que deseas tirar '${productoSeleccionado.nombre}' de tu despensa?")
                     .setCancelable(false)
-                    .setPositiveButton("Sí, eliminar") { _, _ ->
+                    .setPositiveButton("Confirmar") { _, _ ->
                         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                             database.productoDao().eliminar(productoSeleccionado)
                             withContext(Dispatchers.Main) {
                                 listaProductos.removeAt(posicion)
                                 adapter.notifyItemRemoved(posicion)
-                                Toast.makeText(requireContext(), "Eliminado", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }

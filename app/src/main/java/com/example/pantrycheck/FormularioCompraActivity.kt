@@ -16,6 +16,7 @@ import java.util.Locale
 class FormularioCompraActivity : AppCompatActivity() {
 
     private lateinit var database: AppDatabase
+    private var compraId: Int = 0 // 0 significa que es nuevo. Si cambia, significa que estamos editando.
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +30,14 @@ class FormularioCompraActivity : AppCompatActivity() {
         val btnSimular = findViewById<MaterialButton>(R.id.btnSimularC)
 
         btnVolver.setOnClickListener { finish() }
+
+        // Logica edición
+        if (intent.hasExtra("ID")) {
+            compraId = intent.getIntExtra("ID", 0)
+            etNombre.setText(intent.getStringExtra("NOMBRE"))
+            etCantidad.setText(intent.getIntExtra("CANTIDAD", 1).toString())
+            btnSimular.text = "Actualizar Precio"
+        }
 
         btnSimular.setOnClickListener {
             val nombre = etNombre.text.toString()
@@ -52,26 +61,34 @@ class FormularioCompraActivity : AppCompatActivity() {
         val precios = mapOf("Walmart" to precioWalmart, "Soriana" to precioSoriana, "HEB" to precioHEB)
         val mejorTienda = precios.minByOrNull { it.value }
 
-        val mensaje = """
-            Buscando en la red...
-            🛒 Soriana: $${'$'}{precioSoriana}
-            🛒 HEB: $${'$'}{precioHEB}
-            🛒 Walmart: $${'$'}{precioWalmart}
-            
-            ✔️ ¡La mejor opción es ${'$'}{mejorTienda?.key}!
-            ¿Agregar a la lista por $${mejorTienda?.value}?
-        """.trimIndent()
+        val mensaje = "Buscando en la red...\n" +
+                "🏪 Soriana: \$${precioSoriana}\n" +
+                "🏪 HEB: \$${precioHEB}\n" +
+                "🏪 Walmart: \$${precioWalmart}\n\n" +
+                "✅ La mejor opción es ${mejorTienda?.key}.\n" +
+                "¿Guardar en la lista por \$${mejorTienda?.value}?"
 
         AlertDialog.Builder(this)
             .setTitle("Simulador de Ahorro")
             .setMessage(mensaje)
-            .setPositiveButton("Sí, agregar") { _, _ ->
-                val nuevoItem = ItemCompra(nombre = nombre, cantidad = cantidad, precioEstimado = mejorTienda?.value ?: 0.0)
+            .setPositiveButton("Sí, guardar") { _, _ ->
+                // Mantenemos el ID: Si es 0 es nuevo, si no, es edición
+                val nuevoItem = ItemCompra(
+                    id = compraId,
+                    nombre = nombre,
+                    cantidad = cantidad,
+                    precioEstimado = mejorTienda?.value ?: 0.0
+                )
+
                 lifecycleScope.launch(Dispatchers.IO) {
-                    database.compraDao().insertar(nuevoItem)
+                    if (compraId == 0) {
+                        database.compraDao().insertar(nuevoItem)
+                    } else {
+                        database.compraDao().actualizar(nuevoItem)
+                    }
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@FormularioCompraActivity, "Agregado correctamente", Toast.LENGTH_SHORT).show()
-                        finish() // Cierra la pantalla y regresa
+                        Toast.makeText(this@FormularioCompraActivity, "Guardado correctamente", Toast.LENGTH_SHORT).show()
+                        finish()
                     }
                 }
             }

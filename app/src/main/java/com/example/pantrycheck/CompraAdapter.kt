@@ -5,58 +5,55 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class CompraAdapter(
-    private val lista: List<ItemCompra>,
+    private val listaCompras: List<ItemCompra>,
     private val alCambiarEstado: (ItemCompra) -> Unit,
-    private val alEliminar: (ItemCompra) -> Unit
-) : RecyclerView.Adapter<CompraAdapter.ViewHolder>() {
+    private val alTocar: (ItemCompra) -> Unit // Funcion editar
+) : RecyclerView.Adapter<CompraAdapter.CompraViewHolder>() {
 
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val checkbox: CheckBox = view.findViewById(R.id.cbComprado)
-        val nombre: TextView = view.findViewById(R.id.tvNombreCompra)
-        val detalle: TextView = view.findViewById(R.id.tvDetalleCompra)
-        val subtotal: TextView = view.findViewById(R.id.tvSubtotalCompra)
-        val btnEliminar: ImageView = view.findViewById(R.id.btnEliminarCompra)
+    class CompraViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        // IDs tienen que coincidir con los de tu item_compra.xml
+        val cbComprado: CheckBox = itemView.findViewById(R.id.cbComprado)
+        val tvNombre: TextView = itemView.findViewById(R.id.tvNombreCompra)
+        val tvDetalles: TextView = itemView.findViewById(R.id.tvDetallesCompra)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_compra, parent, false)
-        return ViewHolder(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CompraViewHolder {
+        val vista = LayoutInflater.from(parent.context).inflate(R.layout.item_compra, parent, false)
+        return CompraViewHolder(vista)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = lista[position]
+    override fun onBindViewHolder(holder: CompraViewHolder, position: Int) {
+        val item = listaCompras[position]
 
-        holder.nombre.text = item.nombre
-        holder.detalle.text = String.format("Cant: %d | Estimado: $%.2f", item.cantidad, item.precioEstimado)
-        holder.subtotal.text = String.format("$%.2f", item.subtotal)
+        // Evitar el listener para evitar bucles
+        holder.cbComprado.setOnCheckedChangeListener(null)
+        holder.cbComprado.isChecked = item.comprado
 
-        // Desactiva el listener para evitar bucles
-        holder.checkbox.setOnCheckedChangeListener(null)
-        holder.checkbox.isChecked = item.comprado
+        holder.tvNombre.text = item.nombre
+        val subtotal = item.cantidad * item.precioEstimado
+        holder.tvDetalles.text = String.format("Cant: %d  |  Estimado: $%.2f", item.cantidad, subtotal)
 
-        // Si se marca como comprado, tachar el nombre
+        // Efecto de tachado si ya lo compraste
         if (item.comprado) {
-            holder.nombre.paintFlags = holder.nombre.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
-            holder.nombre.setTextColor(android.graphics.Color.GRAY)
+            holder.tvNombre.paintFlags = holder.tvNombre.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
         } else {
-            holder.nombre.paintFlags = holder.nombre.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
-            holder.nombre.setTextColor(android.graphics.Color.BLACK)
+            holder.tvNombre.paintFlags = holder.tvNombre.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
         }
 
-        holder.checkbox.setOnCheckedChangeListener { _, isChecked ->
-            item.comprado = isChecked
-            alCambiarEstado(item)
+        holder.cbComprado.setOnCheckedChangeListener { _, isChecked ->
+            val itemModificado = item.copy(comprado = isChecked)
+            alCambiarEstado(itemModificado)
         }
 
-        holder.btnEliminar.setOnClickListener {
-            alEliminar(item)
+        // Logica editar al tocar
+        holder.itemView.setOnClickListener {
+            alTocar(item)
         }
     }
 
-    override fun getItemCount() = lista.size
+    override fun getItemCount(): Int = listaCompras.size
 }
